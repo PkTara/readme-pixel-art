@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 import os
 import ast
 import string
+import html
 
 import yaml
 
@@ -59,23 +60,21 @@ def generate_last_paints():
     return markdown + "\n"
 
 def canvas_to_markdown(canvas):
+    # Plain linked images rather than a table: GitHub pads every table cell,
+    # which makes a 16x16 canvas too wide to fit half a laptop screen
     columns = column_names(len(canvas[0]))
     size = settings['canvas']['pixel_size']
 
-    # Write header in Markdown format
-    markdown = "|   | " + " | ".join(columns) + " |\n"
-    markdown += "|---|" + ":-:|" * len(columns) + "\n"
+    markdown = "<p align=\"center\">\n"
 
-    # Write canvas, row 1 at the top
     for row_idx, row in enumerate(canvas):
         row_name = str(row_idx + 1)
-        markdown += "| **" + row_name + "** | "
 
         for col_idx, colour in enumerate(row):
             pixel = columns[col_idx] + row_name
-            markdown += "[<img src=\"img/pixels/{}.svg\" width={}px alt=\"{}\">]({}) | ".format(
-                colour, size, pixel, create_paint_link(pixel))
+            markdown += "<a href=\"{}\"><img src=\"img/pixels/{}.svg\" width={} height={} alt=\"{}\" title=\"{}\"></a>".format(
+                html.escape(create_paint_link(pixel)), colour, size, size, pixel, pixel)
 
-        markdown += "\n"
+        markdown += "<br>\n"
 
-    return markdown
+    return markdown + "</p>\n"
