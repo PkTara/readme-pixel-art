@@ -6,6 +6,9 @@ comments:
       {author} done! Painted pixel `{pixel}` {colour}.
       Thanks for contributing!
 
+  # Message displayed when the pixel couldn't be saved, even after retrying
+  save_failed: "{author} Sorry, something went wrong saving pixel `{pixel}`. Please try again!"
+
   # Message displayed when the pixel coordinate in the title is outside the canvas
   invalid_pixel: "{author} Sorry, `{pixel}` isn't a pixel on the canvas. Please click a pixel in the README and don't change the issue title!"
 

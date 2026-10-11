@@ -3,6 +3,9 @@ import os
 import sys
 import ast
 import json
+import time
+import random
+import subprocess
 from enum import Enum
 
 import yaml
@@ -12,6 +15,7 @@ import src.markdown as markdown
 import src.selftest as selftest
 
 CANVAS_FILE = 'data/canvas.json'
+MAX_PUSH_ATTEMPTS = 10
 
 
 class Action(Enum):
@@ -109,7 +113,37 @@ def write_readme(canvas, settings):
         file.write(readme)
 
 
-def main(issue, issue_author, repo_owner):
+def git(*args):
+    return subprocess.run(['git', *args], capture_output=True, text=True)
+
+
+def commit_with_retry(apply_changes, message):
+    """Apply the changes on top of the latest commit and push, retrying if another run pushed first"""
+    branch = os.environ.get('GITHUB_REF_NAME') or git('rev-parse', '--abbrev-ref', 'HEAD').stdout.strip()
+
+    for attempt in range(1, MAX_PUSH_ATTEMPTS + 1):
+        # Start from the latest commit, not the one this run was triggered on
+        git('fetch', 'origin', branch)
+        git('reset', '--hard', f'origin/{branch}')
+
+        apply_changes()
+
+        git('add', '-A')
+        if git('diff', '--cached', '--quiet').returncode == 0:
+            return True  # Nothing changed (e.g. same colour painted again)
+
+        git('commit', '-m', message)
+        push = git('push', 'origin', f'HEAD:{branch}')
+        if push.returncode == 0:
+            return True
+
+        print(f'Push attempt {attempt} rejected, retrying:\n{push.stderr}', file=sys.stderr)
+        time.sleep(random.uniform(1, 3) * attempt)
+
+    return False
+
+
+def main(issue, issue_author, repo_owner, commit=None):
     action = parse_issue(issue.title)
 
     with open('data/settings.yaml', 'r') as settings_file:
@@ -141,16 +175,26 @@ def main(issue, issue_author, repo_owner):
         issue.edit(state='closed', labels=['Invalid'])
         return False, 'ERROR: Invalid colour!'
 
-    canvas[row - 1][col_idx] = colour
-    save_canvas(canvas)
+    def apply_paint():
+        # Reload the canvas: when retrying, the files have been reset to the latest commit
+        canvas = load_canvas(settings)
+        canvas[row - 1][col_idx] = colour
+        save_canvas(canvas)
 
-    update_last_paints(f'{pixel} {colour}: {issue_author}')
-    update_top_painters(issue_author)
+        update_last_paints(f'{pixel} {colour}: {issue_author}')
+        update_top_painters(issue_author)
+        write_readme(canvas, settings)
 
+    if commit is None:
+        apply_paint()
+    elif not commit(apply_paint, f'{issue.title} by {issue_author}'):
+        issue.create_comment(settings['comments']['save_failed'].format(author=issue_author, pixel=pixel))
+        issue.edit(state='closed', labels=['Failed'])
+        return False, 'ERROR: Could not push the painted pixel!'
+
+    # Only report success once the pixel is actually saved
     issue.create_comment(settings['comments']['successful_paint'].format(author=issue_author, pixel=pixel, colour=colour))
     issue.edit(state='closed', labels=['🎨 ' + colour])
-
-    write_readme(canvas, settings)
 
     return True, ''
 
@@ -173,7 +217,7 @@ if __name__ == '__main__':
     issue_author = '@' + issue.user.login
     repo_owner = '@' + os.environ['REPOSITORY_OWNER']
 
-    ret, reason = main(issue, issue_author, repo_owner)
+    ret, reason = main(issue, issue_author, repo_owner, commit=commit_with_retry)
 
     if ret == False:
         sys.exit(reason)
