@@ -86,6 +86,9 @@ def main(issue, issue_author, repo_owner):
 
     if action[0] == Action.RIBBET:
         issue.create_comment(settings['comments']['frog_ribbet'].format(author=issue_author))
+        
+        issue.edit(state = "closed")
+
 
     if action[0] == Action.NEW_GAME:
         if os.path.exists('games/current.pgn') and issue_author != repo_owner:
