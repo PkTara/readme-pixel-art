@@ -1,0 +1,28 @@
+name: Paint a pixel
+description: Pick a colour for the pixel you clicked
+title: "Pixel: Paint "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please don't change the title, it says which pixel you're painting.
+        Pick a colour below and click **Create**. The README updates in about a minute.
+  - type: dropdown
+    id: colour
+    attributes:
+      label: Colour
+      options:
+        - white
+        - black
+        - grey
+        - red
+        - orange
+        - yellow
+        - green
+        - cyan
+        - blue
+        - purple
+        - pink
+        - brown
+    validations:
+      required: true

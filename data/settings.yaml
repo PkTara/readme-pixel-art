@@ -1,69 +1,62 @@
 comments:
   frog_ribbet: "RIBBET! {author}"
-  # Message to be shown when two consecutive moves are played. {author} is the author of the issue
-  consecutive_moves: "Sorry {author}, you can't move twice in a row! You can ask someone to play the next turn :D"
 
-  # Message to be shown on game over. {outcome} is a message that specifies wether white wins, black wins or
-  # both players draw, {num_moves} corresponds with the number of moves, {num_players} is the number of players
-  # in this game and finally {players} is a comma-separated list of all players in this game (in no particular
-  # order)
-  game_over: |-
-      And that's a game over! {outcome}! This game had {num_moves} moves made by {num_players} players.
+  # Message displayed after a pixel is painted. {pixel} is the coordinate (C4 for example), {colour} the colour name
+  successful_paint: |-
+      {author} done! Painted pixel `{pixel}` {colour}.
+      Thanks for contributing!
 
-      Thanks to {players} for participating!
+  # Message displayed when the pixel coordinate in the title is outside the canvas
+  invalid_pixel: "{author} Sorry, `{pixel}` isn't a pixel on the canvas. Please click a pixel in the README and don't change the issue title!"
 
-  # This message is displayed if the board is in an invalid state. This shouldn't be shown unless something
-  # has gone terribly wrong
-  invalid_board: "{author} Sorry, I can't perform the specified move. The board is invalid!"
+  # Message displayed when no valid colour could be read from the issue
+  invalid_colour: "{author} Sorry, I couldn't figure out which colour you picked. Please try again and choose one from the dropdown!"
 
-  # Message to be displayed when a player plays an invalid move
-  invalid_move: |-
-      {author} Whaaaat? The move `{move}` is invalid!
-      Maybe someone squeezed a move before you. Please try again.
-
-  # Message displayed if a player tries to start a new game mid-game and the author of the issue is not the
-  # owner of the repository (the repo owner can always restart a game at any time)
-  invalid_new_game: "{author} Sorry, but you cannot start a new game while the old one is still in progress. Only the repo owner can do that."
-
-  # Message displayed after a successful move done by a player. {move} is the move in UCI coordinates (e2e4 for example)
-  successful_move: |-
-      {author} done! Successfully played move `{move}` for current game.
-      Thanks for playing!
-
-  # Message displayed when either a player or the repository owner start a new game
-  successful_new_game: "{author} done! New game successfully started!"
-
-  # Error message shown after an invalid command to the chess bot
+  # Error message shown after an invalid command to the bot
   unknown_command: "{author} Sorry, I can't understand the command. Please try again and do not modify the issue title!"
 
 issues:
   link: "https://github.com/{repo}/issues/new?{params}"
-  move:
-    body: "Please do not change the title. Just click \"Submit new issue\". You don't need to do anything else :D"
-    title: "Chess: Move {source} to {dest}"
-  new_game:
-    body: "Please do not change the title. Just click \"Submit new issue\". You don't need to do anything else :D"
-    title: "Chess: Start new game"
+  paint:
+    template: "paint-pixel.yml"
+    title: "Pixel: Paint {pixel}"
+
+canvas:
+  width: 8
+  height: 8
+  # Size (in px) each pixel is drawn at in the README
+  pixel_size: 40
+  default_colour: white
+
+# Colours offered in the issue form. Names must match the dropdown options in
+# .github/ISSUE_TEMPLATE/paint-pixel.yml and the images in img/pixels/
+palette:
+  white: "#ffffff"
+  black: "#000000"
+  grey: "#9e9e9e"
+  red: "#e53935"
+  orange: "#fb8c00"
+  yellow: "#fdd835"
+  green: "#43a047"
+  cyan: "#00acc1"
+  blue: "#1e88e5"
+  purple: "#8e24aa"
+  pink: "#f06292"
+  brown: "#6d4c41"
 
 markers:
-  board:
-    begin: "<!-- BEGIN CHESS BOARD -->\n"
-    end: "<!-- END CHESS BOARD -->\n"
-  last_moves:
-    begin: "<!-- BEGIN LAST MOVES -->\n"
-    end: "<!-- END LAST MOVES -->\n"
-  moves:
-    begin: "<!-- BEGIN MOVES LIST -->\n"
-    end: "<!-- END MOVES LIST -->\n"
-  top_moves:
-    begin: "<!-- BEGIN TOP MOVES -->\n"
-    end: "<!-- END TOP MOVES -->\n"
-  turn:
-    begin: "<!-- BEGIN TURN -->"
-    end: "<!-- END TURN -->"
+  canvas:
+    begin: "<!-- BEGIN CANVAS -->\n"
+    end: "<!-- END CANVAS -->\n"
+  last_paints:
+    begin: "<!-- BEGIN LAST PAINTS -->\n"
+    end: "<!-- END LAST PAINTS -->\n"
+  top_painters:
+    begin: "<!-- BEGIN TOP PAINTERS -->\n"
+    end: "<!-- END TOP PAINTERS -->\n"
 
 misc:
-  # Maximum number of last moves displayed
-  max_last_moves: 5
-  # Maximum number of top players displayed
-  max_top_moves: 10
+  # Maximum number of last paints displayed
+  max_last_paints: 5
+  # Maximum number of top painters displayed
+  max_top_painters: 10
