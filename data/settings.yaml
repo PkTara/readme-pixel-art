@@ -22,10 +22,10 @@ issues:
     title: "Pixel: Paint {pixel}"
 
 canvas:
-  width: 8
-  height: 8
+  width: 16
+  height: 16
   # Size (in px) each pixel is drawn at in the README
-  pixel_size: 40
+  pixel_size: 28
   default_colour: white
 
 # Colours offered in the issue form. Names must match the dropdown options in

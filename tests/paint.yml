@@ -24,3 +24,9 @@ steps:
     colour: white
     expect: paint
     pixel: A1
+
+  - author: '@player2'
+    title: 'Pixel: Paint P16'
+    colour: green
+    expect: paint
+    pixel: P16

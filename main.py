@@ -76,13 +76,19 @@ def parse_colour(body, palette):
 
 
 def load_canvas(settings):
-    if os.path.exists(CANVAS_FILE):
-        with open(CANVAS_FILE, 'r') as file:
-            return json.load(file)
-
     width = settings['canvas']['width']
     height = settings['canvas']['height']
-    return [[settings['canvas']['default_colour']] * width for _ in range(height)]
+    default = settings['canvas']['default_colour']
+
+    canvas = []
+    if os.path.exists(CANVAS_FILE):
+        with open(CANVAS_FILE, 'r') as file:
+            canvas = json.load(file)
+
+    # Grow or crop the saved canvas so it always matches the configured size
+    canvas = [row[:width] + [default] * (width - len(row)) for row in canvas[:height]]
+    canvas += [[default] * width for _ in range(height - len(canvas))]
+    return canvas
 
 
 def save_canvas(canvas):
