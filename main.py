@@ -61,7 +61,7 @@ def replace_text_between(original_text, marker, replacement_text):
 
 def parse_issue(title):
     """Parse issue title and return a tuple with (action, <move>)"""
-    if title.lower() == 'Pixel: RIBBET!':
+    if title.lower() == 'pixel: ribbet!':
         return (Action.RIBBET, None)
 
     if title.lower() == 'chess: start new game':
