@@ -10,7 +10,7 @@ jobs:
       issues: write
       contents: write
     runs-on: ubuntu-latest
-    if: startsWith(github.event.issue.title, 'Chess:')
+    if: startsWith(github.event.issue.title, 'Chess:') or startsWith(github.event.issue.title, "Pixel:")
 
     steps:
       - uses: actions/checkout@v3
