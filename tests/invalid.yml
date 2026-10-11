@@ -2,7 +2,7 @@ name: Invalid requests
 owner: '@owner'
 steps:
   - author: '@player1'
-    title: 'Pixel: Paint Q1'
+    title: 'Pixel: Paint M1'
     colour: red
     expect: invalid_pixel
 

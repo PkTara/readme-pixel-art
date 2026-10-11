@@ -26,7 +26,7 @@ steps:
     pixel: A1
 
   - author: '@player2'
-    title: 'Pixel: Paint P16'
+    title: 'Pixel: Paint L16'
     colour: green
     expect: paint
-    pixel: P16
+    pixel: L16

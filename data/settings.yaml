@@ -25,7 +25,7 @@ issues:
     title: "Pixel: Paint {pixel}"
 
 canvas:
-  width: 16
+  width: 12
   height: 16
   # Size (in px) each pixel is drawn at in the README
   pixel_size: 28
