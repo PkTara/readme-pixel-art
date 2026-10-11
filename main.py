@@ -153,6 +153,15 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2 and sys.argv[1] == '--self-test':
         sys.exit(0 if selftest.run(main) else 1)
 
+    if len(sys.argv) >= 2 and sys.argv[1] == '--render':
+        # Redraw the README from the saved canvas (or a blank one) without needing an issue
+        with open('data/settings.yaml', 'r') as settings_file:
+            settings = yaml.load(settings_file, Loader=yaml.FullLoader)
+        canvas = load_canvas(settings)
+        save_canvas(canvas)
+        write_readme(canvas, settings)
+        sys.exit(0)
+
     repo = Github(os.environ['GITHUB_TOKEN']).get_repo(os.environ['GITHUB_REPOSITORY'])
     issue = repo.get_issue(number=int(os.environ['ISSUE_NUMBER']))
     issue_author = '@' + issue.user.login
