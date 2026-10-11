@@ -19,6 +19,7 @@ class Action(Enum):
     UNKNOWN = 0
     MOVE = 1
     NEW_GAME = 2
+    RIBBET = 3
 
 
 def update_top_moves(user):
@@ -79,6 +80,9 @@ def main(issue, issue_author, repo_owner):
 
     with open('data/settings.yaml', 'r') as settings_file:
         settings = yaml.load(settings_file, Loader=yaml.FullLoader)
+
+    if action[0] == Action.RIBBET:
+        issue.create_comment(settings['comments']['frog_ribbet'].format(author=issue_author))
 
     if action[0] == Action.NEW_GAME:
         if os.path.exists('games/current.pgn') and issue_author != repo_owner:

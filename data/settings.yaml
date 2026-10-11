@@ -1,4 +1,5 @@
 comments:
+  frog_ribbet: "RIBBET! {author}"
   # Message to be shown when two consecutive moves are played. {author} is the author of the issue
   consecutive_moves: "Sorry {author}, you can't move twice in a row! You can ask someone to play the next turn :D"
 
