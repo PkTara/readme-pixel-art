@@ -1,0 +1,36 @@
+name: Invalid requests
+owner: '@owner'
+steps:
+  - author: '@player1'
+    title: 'Pixel: Paint I1'
+    colour: red
+    expect: invalid_pixel
+
+  - author: '@player1'
+    title: 'Pixel: Paint A9'
+    colour: red
+    expect: invalid_pixel
+
+  - author: '@player1'
+    title: 'Pixel: Paint A0'
+    colour: red
+    expect: invalid_pixel
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    body: "### Colour\n\nchartreuse"
+    expect: invalid_colour
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    body: ''
+    expect: invalid_colour
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2 please'
+    colour: red
+    expect: unknown
+
+  - author: '@player1'
+    title: 'Pixel: Ribbet!'
+    expect: ribbet

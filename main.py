@@ -2,47 +2,41 @@ import re
 import os
 import sys
 import ast
+import json
 from enum import Enum
-from datetime import datetime
 
-import chess
-import chess.pgn
 import yaml
 from github import Github
 
 import src.markdown as markdown
 import src.selftest as selftest
 
-# TODO: Use an image instead of a raw link to start new games
+CANVAS_FILE = 'data/canvas.json'
+
 
 class Action(Enum):
     UNKNOWN = 0
-    MOVE = 1
-    NEW_GAME = 2
-    RIBBET = 3
+    PAINT = 1
+    RIBBET = 2
 
 
-def update_top_moves(user):
-    """Adds the given user to the top moves file"""
-    with open('data/top_moves.txt', 'r') as file:
-        contents = file.read()
-        dictionary = ast.literal_eval(contents)
+def update_top_painters(user):
+    """Adds the given user to the top painters file"""
+    with open('data/top_painters.txt', 'r') as file:
+        dictionary = ast.literal_eval(file.read())
 
-    if user not in dictionary:
-        dictionary[user] = 1 # First move
-    else:
-        dictionary[user] += 1
+    dictionary[user] = dictionary.get(user, 0) + 1
 
-    with open('data/top_moves.txt', 'w') as file:
+    with open('data/top_painters.txt', 'w') as file:
         file.write(str(dictionary))
 
 
-def update_last_moves(line):
-    """Adds the given line to the last moves file"""
-    with open('data/last_moves.txt', 'r+') as last_moves:
-        content = last_moves.read()
-        last_moves.seek(0, 0)
-        last_moves.write(line.rstrip('\r\n') + '\n' + content)
+def update_last_paints(line):
+    """Adds the given line to the top of the last paints file"""
+    with open('data/last_paints.txt', 'r+') as last_paints:
+        content = last_paints.read()
+        last_paints.seek(0, 0)
+        last_paints.write(line.rstrip('\r\n') + '\n' + content)
 
 
 def replace_text_between(original_text, marker, replacement_text):
@@ -60,181 +54,109 @@ def replace_text_between(original_text, marker, replacement_text):
 
 
 def parse_issue(title):
-    """Parse issue title and return a tuple with (action, <move>)"""
+    """Parse issue title and return a tuple with (action, <pixel>)"""
     if title.lower() == 'pixel: ribbet!':
         return (Action.RIBBET, None)
 
-    if title.lower() == 'chess: start new game':
-        return (Action.NEW_GAME, None)
-
-    if 'chess: move' in title.lower():
-        match_obj = re.match('Chess: Move ([A-H][1-8]) to ([A-H][1-8])', title, re.I)
-
-        source = match_obj.group(1)
-        dest   = match_obj.group(2)
-        return (Action.MOVE, (source + dest).lower())
+    match_obj = re.fullmatch(r'Pixel: Paint ([A-Z])(\d+)', title.strip(), re.I)
+    if match_obj is not None:
+        return (Action.PAINT, (match_obj.group(1).upper(), int(match_obj.group(2))))
 
     return (Action.UNKNOWN, None)
 
 
+def parse_colour(body, palette):
+    """Read the colour picked in the issue form. Issue forms render as '### Colour\\n\\n<value>'"""
+    match_obj = re.search(r'###\s*Colou?r\s*\n+\s*([^\n]+)', body or '', re.I)
+    if match_obj is None:
+        return None
+
+    colour = match_obj.group(1).strip().lower()
+    return colour if colour in palette else None
+
+
+def load_canvas(settings):
+    if os.path.exists(CANVAS_FILE):
+        with open(CANVAS_FILE, 'r') as file:
+            return json.load(file)
+
+    width = settings['canvas']['width']
+    height = settings['canvas']['height']
+    return [[settings['canvas']['default_colour']] * width for _ in range(height)]
+
+
+def save_canvas(canvas):
+    with open(CANVAS_FILE, 'w') as file:
+        json.dump(canvas, file, indent=1)
+        file.write('\n')
+
+
+def write_readme(canvas, settings):
+    with open('README.md', 'r') as file:
+        readme = file.read()
+
+    readme = replace_text_between(readme, settings['markers']['canvas'], markdown.canvas_to_markdown(canvas))
+    readme = replace_text_between(readme, settings['markers']['last_paints'], markdown.generate_last_paints())
+    readme = replace_text_between(readme, settings['markers']['top_painters'], markdown.generate_top_painters())
+
+    with open('README.md', 'w') as file:
+        file.write(readme)
+
+
 def main(issue, issue_author, repo_owner):
     action = parse_issue(issue.title)
-    gameboard = chess.Board()
 
     with open('data/settings.yaml', 'r') as settings_file:
         settings = yaml.load(settings_file, Loader=yaml.FullLoader)
 
     if action[0] == Action.RIBBET:
         issue.create_comment(settings['comments']['frog_ribbet'].format(author=issue_author))
-        
-        issue.edit(state = "closed")
-
-
-    if action[0] == Action.NEW_GAME:
-        if os.path.exists('games/current.pgn') and issue_author != repo_owner:
-            issue.create_comment(settings['comments']['invalid_new_game'].format(author=issue_author))
-            issue.edit(state='closed')
-            return False, 'ERROR: A current game is in progress. Only the repo owner can start a new game'
-
-        issue.create_comment(settings['comments']['successful_new_game'].format(author=issue_author))
         issue.edit(state='closed')
+        return True, ''
 
-        with open('data/last_moves.txt', 'w') as last_moves:
-            last_moves.write('Start game: ' + issue_author)
-
-        # Create new game
-        game = chess.pgn.Game()
-        game.headers['Event'] = repo_owner + '\'s Online Open Chess Tournament'
-        game.headers['Site'] = 'https://github.com/' + os.environ['GITHUB_REPOSITORY']
-        game.headers['Date'] = datetime.now().strftime('%Y.%m.%d')
-        game.headers['Round'] = '1'
-
-    elif action[0] == Action.MOVE:
-        if not os.path.exists('games/current.pgn'):
-            return False, 'ERROR: There is no game in progress! Start a new game first'
-
-        # Load game from "games/current.pgn"
-        with open('games/current.pgn') as pgn_file:
-            game = chess.pgn.read_game(pgn_file)
-            gameboard = game.board()
-
-        with open('data/last_moves.txt') as moves:
-            line = moves.readline()
-            last_player = line.split(':')[1].strip()
-            last_move   = line.split(':')[0].strip()
-
-        for move in game.mainline_moves():
-            gameboard.push(move)
-
-        if action[1][:2] == action[1][2:]:
-            issue.create_comment(settings['comments']['invalid_move'].format(author=issue_author, move=action[1]))
-            issue.edit(state='closed', labels=['Invalid'])
-            return False, 'ERROR: Move is invalid!'
-
-        # Try to move with promotion to queen
-        if chess.Move.from_uci(action[1] + 'q') in gameboard.legal_moves:
-            action = (action[0], action[1] + 'q')
-
-        move = chess.Move.from_uci(action[1])
-
-        # Check if player is moving twice in a row
-        if last_player == issue_author and 'Start game' not in last_move:
-            issue.create_comment(settings['comments']['consecutive_moves'].format(author=issue_author))
-            issue.edit(state='closed', labels=['Invalid'])
-            return False, 'ERROR: Two moves in a row!'
-
-        # Check if move is valid
-        if move not in gameboard.legal_moves:
-            issue.create_comment(settings['comments']['invalid_move'].format(author=issue_author, move=action[1]))
-            issue.edit(state='closed', labels=['Invalid'])
-            return False, 'ERROR: Move is invalid!'
-
-        # Check if board is valid
-        if not gameboard.is_valid():
-            issue.create_comment(settings['comments']['invalid_board'].format(author=issue_author))
-            issue.edit(state='closed', labels=['Invalid'])
-            return False, 'ERROR: Board is invalid!'
-
-        issue_labels = ['⚔️ Capture!'] if gameboard.is_capture(move) else []
-        issue_labels += ['White' if gameboard.turn == chess.WHITE else 'Black']
-
-        issue.create_comment(settings['comments']['successful_move'].format(author=issue_author, move=action[1]))
-        issue.edit(state='closed', labels=issue_labels)
-
-        update_last_moves(action[1] + ': ' + issue_author)
-        update_top_moves(issue_author)
-
-        # Perform move
-        gameboard.push(move)
-        game.end().add_main_variation(move, comment=issue_author)
-        game.headers['Result'] = gameboard.result()
-
-    elif action[0] == Action.UNKNOWN:
+    if action[0] == Action.UNKNOWN:
         issue.create_comment(settings['comments']['unknown_command'].format(author=issue_author))
         issue.edit(state='closed', labels=['Invalid'])
         return False, 'ERROR: Unknown action'
 
-    # Save game to "games/current.pgn"
-    print(game, file=open('games/current.pgn', 'w'), end='\n\n')
+    canvas = load_canvas(settings)
+    column, row = action[1]
+    pixel = f'{column}{row}'
+    col_idx = ord(column) - ord('A')
 
-    last_moves = markdown.generate_last_moves()
+    if not (0 <= col_idx < len(canvas[0]) and 1 <= row <= len(canvas)):
+        issue.create_comment(settings['comments']['invalid_pixel'].format(author=issue_author, pixel=pixel))
+        issue.edit(state='closed', labels=['Invalid'])
+        return False, 'ERROR: Pixel is outside the canvas!'
 
-    # If it is a game over, archive current game
-    if gameboard.is_game_over():
-        win_msg = {
-            '1/2-1/2': 'It\'s a draw',
-            '1-0': 'White wins',
-            '0-1': 'Black wins'
-        }
+    colour = parse_colour(issue.body, settings['palette'])
+    if colour is None:
+        issue.create_comment(settings['comments']['invalid_colour'].format(author=issue_author))
+        issue.edit(state='closed', labels=['Invalid'])
+        return False, 'ERROR: Invalid colour!'
 
-        with open('data/last_moves.txt', 'r') as last_moves_file:
-            lines = last_moves_file.readlines()
-            pattern = re.compile('.*: (@[a-z\\d](?:[a-z\\d]|-(?=[a-z\\d])){0,38})', flags=re.I)
-            player_list = { re.match(pattern, line).group(1) for line in lines }
+    canvas[row - 1][col_idx] = colour
+    save_canvas(canvas)
 
-        if gameboard.result() == '1/2-1/2':
-            issue.add_to_labels('👑 Draw!')
-        else:
-            issue.add_to_labels('👑 Winner!')
+    update_last_paints(f'{pixel} {colour}: {issue_author}')
+    update_top_painters(issue_author)
 
-        issue.create_comment(settings['comments']['game_over'].format(
-            outcome=win_msg.get(gameboard.result(), 'UNKNOWN'),
-            players=', '.join(player_list),
-            num_moves=len(lines)-1,
-            num_players=len(player_list)))
+    issue.create_comment(settings['comments']['successful_paint'].format(author=issue_author, pixel=pixel, colour=colour))
+    issue.edit(state='closed', labels=['🎨 ' + colour])
 
-        os.rename('games/current.pgn', datetime.now().strftime('games/game-%Y%m%d-%H%M%S.pgn'))
-        os.remove('data/last_moves.txt')
-
-    with open('README.md', 'r') as file:
-        readme = file.read()
-        readme = replace_text_between(readme, settings['markers']['board'], '{chess_board}')
-        readme = replace_text_between(readme, settings['markers']['moves'], '{moves_list}')
-        readme = replace_text_between(readme, settings['markers']['turn'], '{turn}')
-        readme = replace_text_between(readme, settings['markers']['last_moves'], '{last_moves}')
-        readme = replace_text_between(readme, settings['markers']['top_moves'], '{top_moves}')
-
-    with open('README.md', 'w') as file:
-        # Write new board & list of movements
-        file.write(readme.format(
-            chess_board=markdown.board_to_markdown(gameboard),
-            moves_list=markdown.generate_moves_list(gameboard),
-            turn=('white' if gameboard.turn == chess.WHITE else 'black'),
-            last_moves=last_moves,
-            top_moves=markdown.generate_top_moves()))
+    write_readme(canvas, settings)
 
     return True, ''
 
 
 if __name__ == '__main__':
     if len(sys.argv) >= 2 and sys.argv[1] == '--self-test':
-        selftest.run(main)
-        sys.exit(0)
-    else:
-        repo = Github(os.environ['GITHUB_TOKEN']).get_repo(os.environ['GITHUB_REPOSITORY'])
-        issue = repo.get_issue(number=int(os.environ['ISSUE_NUMBER']))
-        issue_author = '@' + issue.user.login
-        repo_owner = '@' + os.environ['REPOSITORY_OWNER']
+        sys.exit(0 if selftest.run(main) else 1)
+
+    repo = Github(os.environ['GITHUB_TOKEN']).get_repo(os.environ['GITHUB_REPOSITORY'])
+    issue = repo.get_issue(number=int(os.environ['ISSUE_NUMBER']))
+    issue_author = '@' + issue.user.login
+    repo_owner = '@' + os.environ['REPOSITORY_OWNER']
 
     ret, reason = main(issue, issue_author, repo_owner)
 

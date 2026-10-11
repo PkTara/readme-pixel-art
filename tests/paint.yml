@@ -1,0 +1,26 @@
+name: Painting pixels
+owner: '@owner'
+steps:
+  - author: '@player1'
+    title: 'Pixel: Paint C4'
+    colour: red
+    expect: paint
+    pixel: C4
+
+  - author: '@player2'
+    title: 'Pixel: Paint C4'
+    colour: blue
+    expect: paint
+    pixel: C4
+
+  - author: '@player1'
+    title: 'pixel: paint h8'
+    colour: black
+    expect: paint
+    pixel: H8
+
+  - author: '@player1'
+    title: 'Pixel: Paint A1'
+    colour: white
+    expect: paint
+    pixel: A1

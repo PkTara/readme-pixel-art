@@ -1,8 +1,9 @@
 import re
 
 class Issue:
-    def __init__(self, title=''):
+    def __init__(self, title='', body=''):
         self.__title = title
+        self.__body = body
         self.__closed = False
         self.__expected_labels = []
         self.__expected_comments = []
@@ -12,6 +13,10 @@ class Issue:
     @property
     def title(self):
         return self.__title
+
+    @property
+    def body(self):
+        return self.__body
 
     def create_comment(self, text):
         if len(self.__expected_comments) == 0:
