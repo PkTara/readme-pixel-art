@@ -1,0 +1,16 @@
+name: Painting a pixel
+owner: '@player1'
+paints:
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    colour: white
+
+  - author: '@player2'
+    title: 'Pixel: Paint B2'
+    colour: red
+    canvas: changed
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    colour: blue
+    canvas: changed # a different colour looks different

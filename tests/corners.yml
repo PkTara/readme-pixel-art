@@ -1,0 +1,7 @@
+name: Corners of the 12x16 canvas
+owner: '@player1'
+paints:
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: blue }
+  - { author: '@player1', title: 'Pixel: Paint L1', colour: blue }
+  - { author: '@player1', title: 'Pixel: Paint A16', colour: blue }
+  - { author: '@player1', title: 'Pixel: Paint L16', colour: blue }

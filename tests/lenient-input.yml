@@ -1,0 +1,22 @@
+name: Small differences in what people send
+owner: '@player1'
+paints:
+  - author: '@player1'
+    title: 'Pixel: Paint b2' # lowercase coordinate
+    colour: red
+
+  - author: '@player1'
+    title: 'pixel: paint B2' # lowercase command
+    colour: red
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    colour: Red # capital colour
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    body: "### Color\n\nred" # US spelling
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    body: "### Colour\r\n\r\nred\r\n" # Windows line endings

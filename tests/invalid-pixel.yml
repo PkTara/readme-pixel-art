@@ -1,0 +1,9 @@
+name: Pixels that aren't on the canvas
+owner: '@player1'
+paints:
+  - { author: '@player1', title: 'Pixel: Paint M1', colour: red, is_invalid: true }  # one column too far
+  - { author: '@player1', title: 'Pixel: Paint A0', colour: red, is_invalid: true }
+  - { author: '@player1', title: 'Pixel: Paint A17', colour: red, is_invalid: true } # one row too far
+  - { author: '@player1', title: 'Pixel: Paint A99999999999', colour: red, is_invalid: true }
+  - { author: '@player1', title: 'Pixel: Paint ', colour: red, is_invalid: true }    # no coordinate
+  - { author: '@player1', title: 'Pixel: Paint B2 and C3', colour: red, is_invalid: true }

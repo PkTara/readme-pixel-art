@@ -1,0 +1,38 @@
+name: Paints are kept between issues
+owner: '@player1'
+paints:
+  # 1-2: start from a known state
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: white }
+  - { author: '@player1', title: 'Pixel: Paint B1', colour: white }
+
+  # 3: painting A1 red...
+  - author: '@player1'
+    title: 'Pixel: Paint A1'
+    colour: red
+    canvas: changed
+
+  # 4-5: ...looks different from painting B1 red
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: white, canvas_same_as: 2 }
+  - author: '@player1'
+    title: 'Pixel: Paint B1'
+    colour: red
+    canvas_differs_from: 3
+
+  # 6-7: B1 is still red after painting A1, so the canvas isn't back to step 2
+  - { author: '@player2', title: 'Pixel: Paint A1', colour: blue }
+  - author: '@player2'
+    title: 'Pixel: Paint A1'
+    colour: white
+    canvas_differs_from: 2
+
+  # 8: painting B1 back to white restores the canvas from step 2
+  - author: '@player2'
+    title: 'Pixel: Paint B1'
+    colour: white
+    canvas_same_as: 2
+
+  # 9: painting the same colour again is fine and changes nothing
+  - author: '@player1'
+    title: 'Pixel: Paint B1'
+    colour: white
+    canvas: unchanged

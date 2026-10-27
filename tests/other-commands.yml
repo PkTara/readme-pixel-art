@@ -1,0 +1,10 @@
+name: Other commands
+owner: '@player1'
+paints:
+  - author: '@player1'
+    title: 'Pixel: Ribbet!'
+    is_ribbet: true
+
+  - author: '@player2'
+    title: 'Pixel: Do a backflip'
+    is_invalid: true

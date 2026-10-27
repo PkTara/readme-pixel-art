@@ -1,0 +1,15 @@
+name: Every colour in the palette
+owner: '@player1'
+paints:
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: white }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: black }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: grey }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: red }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: orange }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: yellow }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: green }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: cyan }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: blue }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: purple }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: pink }
+  - { author: '@player1', title: 'Pixel: Paint A1', colour: brown }

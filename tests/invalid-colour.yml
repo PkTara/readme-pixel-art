@@ -1,0 +1,22 @@
+name: Colours that can't be used
+owner: '@player1'
+paints:
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    colour: turquoise # not in the palette
+    is_invalid: true
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    body: '' # empty body
+    is_invalid: true
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    body: null # no body at all
+    is_invalid: true
+
+  - author: '@player1'
+    title: 'Pixel: Paint B2'
+    body: "### Colour\n\n_No response_" # what GitHub writes for an empty field
+    is_invalid: true
