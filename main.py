@@ -16,6 +16,7 @@ class Action(Enum):
     UNKNOWN = 0
     PAINT = 1
     RIBBET = 2
+    NEW_CANVAS = 3
 
 palette = {
     'w' : {"name": "white", "hex" : "#ffffff"},
@@ -52,16 +53,22 @@ def parse_issue(issue):
         return (Action.RIBBET, None)
 
     if 'pixel: paint' in title.lower():
-        to_paint_coords = re.search('Pixel: Paint ([A-H][1-8])', title, re.I).group(1)
-        to_paint_color = re.search(r'###\s*Colou?r\s*\n+\s*(\S+)', body or '', re.I).group(1)
+        match = re.search('Pixel: Paint ([A-H][1-8])', title, re.I)
+        to_paint_coords = match.group(1).lower() if match else None
+
+        match = re.search(r'###\s*Colou?r\s*\n+\s*(\S+)', body or '', re.I)
+        to_paint_color = match.group(1).lower() if match else None
+
 
         return (
             Action.PAINT, {
-            "coord" : to_paint_coords.lower(),
+            "coord" : to_paint_coords,
             "color" : to_paint_color
             }
             )
 
+    if 'pixel: new canvas' in title.lower():
+        return (Action.NEW_CANVAS, None)
 
 
     return (Action.UNKNOWN, None)
@@ -82,6 +89,28 @@ def main(issue, issue_author, repo_owner):
         return True
 
     if action[0] == Action.PAINT:
+
+        if not action[1]["coord"]:
+            issue.create_comment(settings['comments']['paint_square_WRONG_COORD'].format(
+            author=issue_author,
+             ))
+            issue.edit(state='closed')
+            return False
+
+        if not action[1]["color"]:
+            issue.create_comment(settings['comments']['paint_square_WRONG_COLOR'].format(
+            author=issue_author,
+             ))
+
+            issue.edit(state='closed')
+            return False
+
+        with open('drawings/current.txt', 'r+') as canvas_file:
+            canvas = canvas_file.readlines()
+            coord = (ord(action[1]["coord"].lower()[0]) - ord('a'), int(action[1]["coord"][1:]) )
+
+            
+
         issue.create_comment(settings['comments']['paint_square'].format(
             author=issue_author,
             square = action[1]["coord"],
@@ -92,17 +121,25 @@ def main(issue, issue_author, repo_owner):
         return True
 
 
-    if action[0] == Action.NEW_GAME:
+    if action[0] == Action.NEW_CANVAS:
         if os.path.exists('drawings/current.txt') and issue_author != repo_owner:
-            issue.create_comment(settings['comments']['invalid_new_game'].format(author=issue_author))
+            issue.create_comment(settings['comments']['invalid_new_canvas'].format(author=issue_author))
             issue.edit(state='closed')
             return False, 'ERROR: A current drawing is in progress. Only the repo owner can start a new game'
 
-        issue.create_comment(settings['comments']['successful_new_game'].format(author=issue_author))
+        issue.create_comment(settings['comments']['successful_new_canvas'].format(author=issue_author))
         issue.edit(state='closed')
 
-        with open('data/last_moves.txt', 'w') as last_moves:
-            last_moves.write('Start game: ' + issue_author)
+        with open('drawings/current.txt', 'w') as canvas:
+            new_canvas = ""
+            for col in range(10): # TODO: make this func args to NEW_CANVAS
+                for row in range(10):
+                    new_canvas += "w"
+                new_canvas  += "\n"
+
+            canvas.write(new_canvas)
+
+        return True
 
 
     elif False and action[0] == Action.MOVE:
@@ -131,7 +168,6 @@ def main(issue, issue_author, repo_owner):
 
     # Save game to "games/current.pgn"
    # print(game, file=open('games/current.pgn', 'w'), end='\n\n')
-
 
   
 

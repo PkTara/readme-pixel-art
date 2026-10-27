@@ -2,6 +2,8 @@ comments:
   frog_ribbet: "RIBBET! {author}"
 
   paint_square: "{author}: Success! You're painting {square} {color}"
+  paint_square_WRONG_COORD: "{author}: Failed! Wrong coord format"
+  paint_square_WRONG_COLOR: "{author}: Failed! Wrong color format"
   
   # This message is displayed if the board is in an invalid state. This shouldn't be shown unless something
   # has gone terribly wrong
@@ -19,7 +21,8 @@ comments:
       Thanks for playing!
 
   # Message displayed when either a player or the repository owner start a new game
-  successful_new_game: "{author} done! New game successfully started!"
+  successful_new_canvas: "{author} done! New canvas successfully started!"
+  invalid_new_canvas: "{author} canvas creation failed"
 
   # Error message shown after an invalid command to the chess bot
   unknown_command: "{author} Sorry, I can't understand the command. Please try again and do not modify the issue title!"
