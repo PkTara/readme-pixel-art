@@ -1,17 +1,8 @@
 comments:
   frog_ribbet: "RIBBET! {author}"
-  # Message to be shown when two consecutive moves are played. {author} is the author of the issue
-  consecutive_moves: "Sorry {author}, you can't move twice in a row! You can ask someone to play the next turn :D"
 
-  # Message to be shown on game over. {outcome} is a message that specifies wether white wins, black wins or
-  # both players draw, {num_moves} corresponds with the number of moves, {num_players} is the number of players
-  # in this game and finally {players} is a comma-separated list of all players in this game (in no particular
-  # order)
-  game_over: |-
-      And that's a game over! {outcome}! This game had {num_moves} moves made by {num_players} players.
-
-      Thanks to {players} for participating!
-
+  paint_square: "{author}: Success! You're painting {square} {color}"
+  
   # This message is displayed if the board is in an invalid state. This shouldn't be shown unless something
   # has gone terribly wrong
   invalid_board: "{author} Sorry, I can't perform the specified move. The board is invalid!"
@@ -21,10 +12,7 @@ comments:
       {author} Whaaaat? The move `{move}` is invalid!
       Maybe someone squeezed a move before you. Please try again.
 
-  # Message displayed if a player tries to start a new game mid-game and the author of the issue is not the
-  # owner of the repository (the repo owner can always restart a game at any time)
-  invalid_new_game: "{author} Sorry, but you cannot start a new game while the old one is still in progress. Only the repo owner can do that."
-
+  
   # Message displayed after a successful move done by a player. {move} is the move in UCI coordinates (e2e4 for example)
   successful_move: |-
       {author} done! Successfully played move `{move}` for current game.
@@ -47,8 +35,8 @@ issues:
 
 markers:
   board:
-    begin: "<!-- BEGIN CHESS BOARD -->\n"
-    end: "<!-- END CHESS BOARD -->\n"
+    begin: "<!-- BEGIN PIXEL BOARD -->\n"
+    end: "<!-- END PIXEL BOARD -->\n"
   last_moves:
     begin: "<!-- BEGIN LAST MOVES -->\n"
     end: "<!-- END LAST MOVES -->\n"

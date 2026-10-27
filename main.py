@@ -11,36 +11,22 @@ from github import Github
 import src.markdown as markdown
 import src.selftest as selftest
 
-# TODO: Use an image instead of a raw link to start new games
 
 class Action(Enum):
     UNKNOWN = 0
-    MOVE = 1
-    NEW_GAME = 2
-    RIBBET = 3
+    PAINT = 1
+    RIBBET = 2
+
+palette = {
+    'w' : {"name": "white", "hex" : "#ffffff"},
+    'r' : {"name": "red", "hex" : "#ff0000"},
+    'g' : {"name": "green", "hex" : "#00ff00"},
+    'b' : {"name": "blue", "hex" : "#0000ff"},
+    'n' : {"name": "black", "hex" : "#000000"},
+}
+palette_inv = {color["name"] : code for code, color in palette.items() }
 
 
-def update_top_moves(user):
-    """Adds the given user to the top moves file"""
-    with open('data/top_moves.txt', 'r') as file:
-        contents = file.read()
-        dictionary = ast.literal_eval(contents)
-
-    if user not in dictionary:
-        dictionary[user] = 1 # First move
-    else:
-        dictionary[user] += 1
-
-    with open('data/top_moves.txt', 'w') as file:
-        file.write(str(dictionary))
-
-
-def update_last_moves(line):
-    """Adds the given line to the last moves file"""
-    with open('data/last_moves.txt', 'r+') as last_moves:
-        content = last_moves.read()
-        last_moves.seek(0, 0)
-        last_moves.write(line.rstrip('\r\n') + '\n' + content)
 
 
 def replace_text_between(original_text, marker, replacement_text):
@@ -57,16 +43,24 @@ def replace_text_between(original_text, marker, replacement_text):
     return leading_text + delimiter_a + replacement_text + delimiter_b + trailing_text
 
 
-def parse_issue(title):
+def parse_issue(issue):
+    title = issue.title
+    body = issue.body
+
     """Parse issue title and return a tuple with (action, <move>)"""
     if title.lower() == 'pixel: ribbet!':
         return (Action.RIBBET, None)
 
     if 'pixel: paint' in title.lower():
-        match_obj = re.match('Pixel: Paint ([A-H][1-8])', title, re.I)
-        to_paint_coords = match_obj.group(1)
+        to_paint_coords = re.search('Pixel: Paint ([A-H][1-8])', title, re.I).group(1)
+        to_paint_color = re.search(r'###\s*Colou?r\s*\n+\s*(\S+)', body or '', re.I).group(1)
 
-        return (Action.PAINT, to_paint_coords.lower())
+        return (
+            Action.PAINT, {
+            "coord" : to_paint_coords.lower(),
+            "color" : to_paint_color
+            }
+            )
 
 
 
@@ -74,7 +68,7 @@ def parse_issue(title):
 
 
 def main(issue, issue_author, repo_owner):
-    action = parse_issue(issue.title)
+    action = parse_issue(issue)
 
 
     with open('data/settings.yaml', 'r') as settings_file:
@@ -85,12 +79,24 @@ def main(issue, issue_author, repo_owner):
         
         issue.edit(state = "closed")
 
+        return True
 
-    if False and action[0] == Action.NEW_GAME:
-        if os.path.exists('games/current.pgn') and issue_author != repo_owner:
+    if action[0] == Action.PAINT:
+        issue.create_comment(settings['comments']['paint_square'].format(
+            author=issue_author,
+            square = action[1]["coord"],
+            color = action[1]["color"]
+             ))
+        issue.edit(state='closed')
+
+        return True
+
+
+    if action[0] == Action.NEW_GAME:
+        if os.path.exists('drawings/current.txt') and issue_author != repo_owner:
             issue.create_comment(settings['comments']['invalid_new_game'].format(author=issue_author))
             issue.edit(state='closed')
-            return False, 'ERROR: A current game is in progress. Only the repo owner can start a new game'
+            return False, 'ERROR: A current drawing is in progress. Only the repo owner can start a new game'
 
         issue.create_comment(settings['comments']['successful_new_game'].format(author=issue_author))
         issue.edit(state='closed')
