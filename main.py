@@ -59,8 +59,8 @@ def update_board():
         output = ""
         for i, row in enumerate(canvas):
             for j, char in enumerate(row):
-                letter_coord = chr( ord('A') + j )
-                pixel_coord = letter_coord + str(i + 1)
+                letter_coord = chr( ord('A') + i )
+                pixel_coord = letter_coord + str(j + 1)
 
                 link = base_issue_link.format(coord=pixel_coord)
                 output += square_md.format(color=palette[char]["name"], issue_link=link)
@@ -144,9 +144,9 @@ def main(issue, issue_author, repo_owner):
 
             color = action[1]["color"]
             if color in palette_inv:
-                row = list(canvas[x])
-                row[y] = palette_inv[color]
-                canvas[x] = "".join(row)
+                row = list(canvas[y])
+                row[x] = palette_inv[color]
+                canvas[y] = "".join(row)
                 print(canvas)
 
            
