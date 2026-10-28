@@ -1,0 +1,23 @@
+name: Starting a new canvas
+owner: '@player1'
+paints:
+  # 1: the owner can always start a new canvas
+  - author: '@player1'
+    title: 'Pixel: New canvas'
+
+  # 2-3: paint something
+  - { author: '@player2', title: 'Pixel: Paint A1', colour: red, canvas: changed }
+  - { author: '@player2', title: 'Pixel: Paint L16', colour: blue, canvas: changed }
+
+  # 4: someone else can't wipe it
+  - author: '@player2'
+    title: 'Pixel: New canvas'
+    is_invalid: true
+
+  # 5: the owner can, and it's blank again like after issue 1
+  - author: '@player1'
+    title: 'Pixel: New canvas'
+    canvas_same_as: 1
+
+  # 6: painting still works on the new canvas
+  - { author: '@player2', title: 'Pixel: Paint B2', colour: green, canvas: changed }

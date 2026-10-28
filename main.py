@@ -51,7 +51,7 @@ def replace_text_between(original_text, marker, replacement_text):
     return leading_text + delimiter_a + replacement_text + delimiter_b + trailing_text
 
 def update_board():
-    with open('drawings/current.txt', 'r') as canvas_file:
+    with open('./drawings/current.txt', 'r') as canvas_file:
         canvas = canvas_file.read().splitlines()
         square_md = '<img src="./img/{color}.svg" width=28 height=28>'
 
@@ -61,14 +61,14 @@ def update_board():
                 output += square_md.format(color=palette[char]["name"])
             output += "<br>\n"
 
-    with open("README.md", "r") as readme:
+    with open("./README.md", "r") as readme:
         with open('data/settings.yaml', 'r') as settings_file:
             settings = yaml.load(settings_file, Loader=yaml.FullLoader)
 
         readme_contents = readme.read()
         new_readme = replace_text_between(readme_contents, settings["markers"]["board"], output)
 
-    with open("README.md", "w") as readme:
+    with open("./README.md", "w") as readme:
         readme.write(new_readme)
 
 
@@ -106,7 +106,7 @@ def main(issue, issue_author, repo_owner):
     action = parse_issue(issue)
 
 
-    with open('data/settings.yaml', 'r') as settings_file:
+    with open('./data/settings.yaml', 'r') as settings_file:
         settings = yaml.load(settings_file, Loader=yaml.FullLoader)
 
     if action[0] == Action.RIBBET:
@@ -133,7 +133,7 @@ def main(issue, issue_author, repo_owner):
             issue.edit(state='closed')
             return False
 
-        with open('drawings/current.txt', 'r+') as canvas_file:
+        with open('./drawings/current.txt', 'r+') as canvas_file:
             canvas = canvas_file.read().splitlines()
             x, y = (ord(action[1]["coord"].lower()[0]) - ord('a'), int(action[1]["coord"][1:]) )
 
@@ -172,7 +172,7 @@ def main(issue, issue_author, repo_owner):
         issue.create_comment(settings['comments']['successful_new_canvas'].format(author=issue_author))
         issue.edit(state='closed')
 
-        with open('drawings/current.txt', 'w') as canvas:
+        with open('./drawings/current.txt', 'w') as canvas:
             new_canvas = ""
             for col in range(10): # TODO: make this func args to NEW_CANVAS
                 for row in range(10):
