@@ -59,8 +59,8 @@ def update_board():
         output = ""
         for i, row in enumerate(canvas):
             for j, char in enumerate(row):
-                letter_coord = chr( ord('A') + i )
-                pixel_coord = letter_coord + str(j + 1)
+                pixel_coord = letter_coord + str(i + 1)
+                letter_coord = chr( ord('A') + j )
 
                 link = base_issue_link.format(coord=pixel_coord)
                 output += square_md.format(color=palette[char]["name"], issue_link=link)
@@ -86,7 +86,7 @@ def parse_issue(issue):
         return (Action.RIBBET, None)
 
     if 'pixel: paint' in title.lower():
-        match = re.search('Pixel: Paint ([A-Z][\d+])', title, re.I)
+        match = re.search('Pixel: Paint ([A-Z]\d+)', title, re.I)
         to_paint_coords = match.group(1).lower() if match else None
 
         match = re.search(r'###\s*Colou?r\s*\n+\s*([^\n]+)', body or '', re.I)
@@ -140,7 +140,7 @@ def main(issue, issue_author, repo_owner):
 
         with open('./drawings/current.txt', 'r+') as canvas_file:
             canvas = canvas_file.read().splitlines()
-            x, y = (ord(action[1]["coord"].lower()[0]) - ord('a'), int(action[1]["coord"][1:]) )
+            x, y = (ord(action[1]["coord"].lower()[0]) - ord('a'), int(action[1]["coord"][1:]) - 1)
 
             color = action[1]["color"]
             if color in palette_inv:
