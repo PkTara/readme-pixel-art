@@ -62,7 +62,7 @@ def update_board():
             output += "<br>\n"
 
     with open("./README.md", "r") as readme:
-        with open('data/settings.yaml', 'r') as settings_file:
+        with open('./data/settings.yaml', 'r') as settings_file:
             settings = yaml.load(settings_file, Loader=yaml.FullLoader)
 
         readme_contents = readme.read()
@@ -114,7 +114,7 @@ def main(issue, issue_author, repo_owner):
         
         issue.edit(state = "closed")
 
-        return True
+        return (True, "")
 
     if action[0] == Action.PAINT:
 
@@ -160,7 +160,7 @@ def main(issue, issue_author, repo_owner):
              ))
         issue.edit(state='closed')
 
-        return True
+        return (True, "")
 
 
     if action[0] == Action.NEW_CANVAS:
@@ -183,7 +183,7 @@ def main(issue, issue_author, repo_owner):
 
         update_board()
 
-        return True
+        return (True, "")
 
 
 

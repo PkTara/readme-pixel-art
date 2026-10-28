@@ -5,7 +5,7 @@ on:
     types: [opened]
 
 jobs:
-  move:
+  drawpixel:
     permissions:
       issues: write
       contents: write
