@@ -53,8 +53,8 @@ def replace_text_between(original_text, marker, replacement_text):
 def update_board():
     with open('./drawings/current.txt', 'r') as canvas_file:
         canvas = canvas_file.read().splitlines()
-        square_md = '<a href={issue_link}> <img src="./img/{color}.svg" width=28 height=28> </a>'
-        base_issue_link = "https://github.com/PkTara/readme-pixel-art/issues/new?template=paint-pixel.yml&title=Pixel%3A+Paint+{coord}"
+        square_md = '<a href="{issue_link}"><img src="./img/{color}.svg" width=28 height=28></a>'
+        base_issue_link = "https://github.com/PkTara/readme-pixel-art/issues/new?template=paint-pixel.yaml&title=Pixel%3A+Paint+{coord}"
 
         output = ""
         for i, row in enumerate(canvas):

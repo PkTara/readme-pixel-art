@@ -10,17 +10,17 @@ body:
     attributes:
       label: Colour
       options:
-        - white
-        - black
-        - grey
-        - red
-        - orange
-        - yellow
-        - green
-        - cyan
-        - blue
-        - purple
-        - pink
-        - brown
+        - ⬜ white
+        - ⬛ black
+        - 🩶 grey
+        - 🟥 red
+        - 🟧 orange
+        - 🟨 yellow
+        - 🟩 green
+        - 🩵 cyan
+        - 🟦 blue
+        - 🟪 purple
+        - 🩷 pink
+        - 🟫 brown
     validations:
       required: true
