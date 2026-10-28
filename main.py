@@ -53,13 +53,13 @@ def replace_text_between(original_text, marker, replacement_text):
 def update_board():
     with open('drawings/current.txt', 'r') as canvas_file:
         canvas = canvas_file.read().splitlines()
-        square_md = "<img src=./img/{color}.svg>"
+        square_md = '<img src="./img/{color}.svg" width=28 height=28>'
 
         output = ""
         for row in canvas:
             for char  in row:
-                output += square_md.format(color=palette[char])
-            output += "\n"
+                output += square_md.format(color=palette[char]["name"])
+            output += "<br>\n"
 
     with open("README.md", "r") as readme:
         with open('data/settings.yaml', 'r') as settings_file:
