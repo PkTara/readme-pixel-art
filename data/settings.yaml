@@ -38,8 +38,8 @@ issues:
 
 markers:
   board:
-    begin: "<!-- BEGIN PIXEL BOARD -->\n"
-    end: "<!-- END PIXEL BOARD -->\n"
+    begin: "<!-- BEGIN CANVAS -->\n"
+    end: "<!-- END CANVAS -->\n"
   last_moves:
     begin: "<!-- BEGIN LAST MOVES -->\n"
     end: "<!-- END LAST MOVES -->\n"

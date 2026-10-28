@@ -19,14 +19,21 @@ class Action(Enum):
     NEW_CANVAS = 3
 
 palette = {
-    'w' : {"name": "white", "hex" : "#ffffff"},
-    'r' : {"name": "red", "hex" : "#ff0000"},
-    'g' : {"name": "green", "hex" : "#00ff00"},
-    'b' : {"name": "blue", "hex" : "#0000ff"},
-    'n' : {"name": "black", "hex" : "#000000"},
+    'w': {"name": "white",  "hex": "#ffffff"},
+    'n': {"name": "black",  "hex": "#000000"},
+    'a': {"name": "grey",   "hex": "#9e9e9e"},
+    'r': {"name": "red",    "hex": "#e53935"},
+    'o': {"name": "orange", "hex": "#fb8c00"},
+    'y': {"name": "yellow", "hex": "#fdd835"},
+    'g': {"name": "green",  "hex": "#43a047"},
+    'c': {"name": "cyan",   "hex": "#00acc1"},
+    'b': {"name": "blue",   "hex": "#1e88e5"},
+    'p': {"name": "purple", "hex": "#8e24aa"},
+    'k': {"name": "pink",   "hex": "#f06292"},
+    'u': {"name": "brown",  "hex": "#6d4c41"},
 }
-palette_inv = {color["name"] : code for code, color in palette.items() }
 
+palette_inv = {color["name"] : code for code, color in palette.items() }
 
 
 
@@ -42,6 +49,27 @@ def replace_text_between(original_text, marker, replacement_text):
     trailing_text = original_text.split(delimiter_b)[1]
 
     return leading_text + delimiter_a + replacement_text + delimiter_b + trailing_text
+
+def update_board():
+    with open('drawings/current.txt', 'r') as canvas_file:
+        canvas = canvas_file.read().splitlines()
+        square_md = "<img src=./img/{color}.svg>"
+
+        output = ""
+        for row in canvas:
+            for char  in row:
+                output += square_md.format(color=palette[char])
+            output += "\n"
+
+    with open("README.md", "r") as readme:
+        with open('data/settings.yaml', 'r') as settings_file:
+            settings = yaml.load(settings_file, Loader=yaml.FullLoader)
+
+        readme_contents = readme.read()
+        new_readme = replace_text_between(readme_contents, settings["markers"]["board"], output)
+
+    with open("README.md", "w") as readme:
+        readme.write(new_readme)
 
 
 def parse_issue(issue):
@@ -106,10 +134,24 @@ def main(issue, issue_author, repo_owner):
             return False
 
         with open('drawings/current.txt', 'r+') as canvas_file:
-            canvas = canvas_file.readlines()
-            coord = (ord(action[1]["coord"].lower()[0]) - ord('a'), int(action[1]["coord"][1:]) )
+            canvas = canvas_file.read().splitlines()
+            x, y = (ord(action[1]["coord"].lower()[0]) - ord('a'), int(action[1]["coord"][1:]) )
+
+            color = action[1]["color"]
+            if color in palette_inv:
+                row = list(canvas[x])
+                row[y] = palette_inv[color]
+                canvas[x] = "".join(row)
+                print(canvas)
+
+           
+
+            canvas_file.seek(0)
+            canvas_file.truncate()
+            canvas_file.write("\n".join(canvas))
 
             
+        update_board()
 
         issue.create_comment(settings['comments']['paint_square'].format(
             author=issue_author,
@@ -139,25 +181,10 @@ def main(issue, issue_author, repo_owner):
 
             canvas.write(new_canvas)
 
+        update_board()
+
         return True
 
-
-    elif False and action[0] == Action.MOVE:
-        if not os.path.exists('games/current.pgn'):
-            return False, 'ERROR: There is no game in progress! Start a new game first'
-
-        if action[1][:2] == action[1][2:]:
-            issue.create_comment(settings['comments']['invalid_move'].format(author=issue_author, move=action[1]))
-            issue.edit(state='closed', labels=['Invalid'])
-            return False, 'ERROR: Move is invalid!'
-
-        
-
-        issue_labels = ['⚔️ Capture!'] # if gameboard.is_capture(move) else []
-        issue_labels += ['White' ] #if gameboard.turn == chess.WHITE else 'Black']
-
-        issue.create_comment(settings['comments']['successful_move'].format(author=issue_author, move=action[1]))
-        issue.edit(state='closed', labels=issue_labels)
 
 
 
