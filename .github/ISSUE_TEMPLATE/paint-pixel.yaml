@@ -1,0 +1,26 @@
+name: Paint a pixel
+description: Pick a colour for the pixel you clicked
+title: "Pixel: Paint "
+body:
+  - type: markdown
+    attributes:
+      value: Please don't change the title, the parser is very specific.
+  - type: dropdown
+    id: colour
+    attributes:
+      label: Colour
+      options:
+        - white
+        - black
+        - grey
+        - red
+        - orange
+        - yellow
+        - green
+        - cyan
+        - blue
+        - purple
+        - pink
+        - brown
+    validations:
+      required: true
