@@ -59,8 +59,8 @@ def update_board():
         output = ""
         for i, row in enumerate(canvas):
             for j, char in enumerate(row):
-                pixel_coord = letter_coord + str(i + 1)
                 letter_coord = chr( ord('A') + j )
+                pixel_coord = letter_coord + str(i + 1)
 
                 link = base_issue_link.format(coord=pixel_coord)
                 output += square_md.format(color=palette[char]["name"], issue_link=link)
