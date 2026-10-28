@@ -86,10 +86,10 @@ def parse_issue(issue):
         return (Action.RIBBET, None)
 
     if 'pixel: paint' in title.lower():
-        match = re.search('Pixel: Paint ([A-H][1-8])', title, re.I)
+        match = re.search('Pixel: Paint ([A-Z][\d+])', title, re.I)
         to_paint_coords = match.group(1).lower() if match else None
 
-        match = re.search(r'###\s*Colou?r\s*\n+\s*(\S+)', body or '', re.I)
+        match = re.search(r'###\s*Colou?r\s*\n+\s*([^\n]+)', body or '', re.I)
         to_paint_color = match.group(1).split()[-1].lower() if match else None
 
 
